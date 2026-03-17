@@ -250,10 +250,18 @@ document.getElementById('searchbtn').addEventListener('click', async function() 
 function displayResults(coords, todayTimes, deltaDay, deltaWeek) {
     const resultDiv = document.getElementById('result');
     resultDiv.innerHTML = `
-        <h2>${coords.name.split(',')[0]}</h2>
-        <p>Daylight today: ${minsToHours(todayTimes.daylight)}</p>
-        <p>vs yesterday: ${formatDelta(deltaDay)}</p>
-        <p>vs last week: ${formatDelta(deltaWeek)}</p>
+        <div class="location">${coords.name.split(',')[0]}</div>
+        <div class="daylight-total">${minsToHours(todayTimes.daylight)} of daylight today</div>
+        <div class="cards">
+            <div class="card">
+                <div class="card-period">vs yesterday</div>
+                <div class="card-delta ${deltaDay >= 0 ? 'gain' : 'loss'}">${formatDelta(deltaDay)}</div>
+            </div>
+            <div class="card">
+                <div class="card-period">vs last week</div>
+                <div class="card-delta ${deltaWeek >= 0 ? 'gain' : 'loss'}">${formatDelta(deltaWeek)}</div>
+            </div>
+        </div>
     `;
 }
 
