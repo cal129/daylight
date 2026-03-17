@@ -223,8 +223,57 @@ async function getCoordinates(city) {
 document.getElementById('searchbtn').addEventListener('click', async function() {
     const city = document.getElementById('input').value.trim();
     const coords = await getCoordinates(city);
+
     const today = new Date();
-    const times = getSunTimes(coords.lat, coords.lon, today);
-    console.log(coords);
-    console.log(times);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const lastWeek = new Date();
+    lastWeek.setDate(lastWeek.getDate() - 7);
+
+    const todayTimes = getSunTimes(coords.lat, coords.lon, today);
+    const yesterdayTimes = getSunTimes(coords.lat, coords.lon, yesterday);
+    const lastWeekTimes = getSunTimes(coords.lat, coords.lon, lastWeek);
+
+    if (todayTimes === null || yesterdayTimes === null || lastWeekTimes === null) {
+        console.log('Sun times unavailable for one or more dates at this location.');
+        return;
+    }
+
+    const deltaDay = todayTimes.daylight - yesterdayTimes.daylight;
+    const deltaWeek = todayTimes.daylight - lastWeekTimes.daylight;
+
+   displayResults(coords, todayTimes, deltaDay, deltaWeek);
 });
+
+function displayResults(coords, todayTimes, deltaDay, deltaWeek) {
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = `
+        <h2>${coords.name.split(',')[0]}</h2>
+        <p>Daylight today: ${minsToHours(todayTimes.daylight)}</p>
+        <p>vs yesterday: ${formatDelta(deltaDay)}</p>
+        <p>vs last week: ${formatDelta(deltaWeek)}</p>
+    `;
+}
+
+function formatDelta(minutes) {
+    const rounded = Math.round(minutes);
+
+    if (rounded > 0) {
+        return `+${rounded} mins more`;
+    }
+
+    if (rounded < 0) {
+        return `${Math.abs(rounded)} mins less`;
+    }
+
+    return '0 mins more';
+}
+
+
+function minsToHours(mins) {
+    const hours = Math.floor(mins / 60);
+    const minutes = Math.floor(mins % 60);
+
+    return `${hours}h ${minutes}m`;
+}
