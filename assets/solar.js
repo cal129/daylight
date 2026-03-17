@@ -205,9 +205,26 @@ function getSunTimes(lat, lon, date) {
     return { sunrise, sunset, daylight };
 }
 
+async function getCoordinates(city) {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`;
+    const response = await fetch(url);
+    const data = await response.json();
+    const result = data[0];
+
+    return {
+        lat: parseFloat(result.lat),
+        lon: parseFloat(result.lon),
+        name: result.display_name
+    };
+}
 
 
-document.getElementById('searchbtn').addEventListener('click', function() {
+
+document.getElementById('searchbtn').addEventListener('click', async function() {
     const city = document.getElementById('input').value.trim();
-    console.log(city);
+    const coords = await getCoordinates(city);
+    const today = new Date();
+    const times = getSunTimes(coords.lat, coords.lon, today);
+    console.log(coords);
+    console.log(times);
 });
