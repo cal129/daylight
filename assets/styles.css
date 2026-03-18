@@ -73,6 +73,12 @@ input:focus {
 .daylight-total {
     font-size: 0.85rem;
     color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.next-milestone {
+    font-size: 0.85rem;
+    color: var(--text-muted);
     margin-bottom: 24px;
 }
 

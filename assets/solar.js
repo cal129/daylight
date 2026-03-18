@@ -257,8 +257,9 @@ function calculateAndDisplay(coords) {
 
     const deltaDay = todayTimes.daylight - yesterdayTimes.daylight;
     const deltaWeek = todayTimes.daylight - lastWeekTimes.daylight;
+    const nextMilestone = getNextDaylightMilestone(coords.lat, today);
 
-    displayResults(coords, todayTimes, deltaDay, deltaWeek);
+    displayResults(coords, todayTimes, deltaDay, deltaWeek, nextMilestone);
 }
 
 
@@ -291,11 +292,12 @@ document.getElementById('input').addEventListener('keydown', function(event) {
 // Keeps the location name short by taking only the first part
 // before the comma — the full string from Nominatim is too long.
 // --------------------------------------------------------------------
-function displayResults(coords, todayTimes, deltaDay, deltaWeek) {
+function displayResults(coords, todayTimes, deltaDay, deltaWeek, nextMilestone) {
     const resultDiv = document.getElementById('result');
     resultDiv.innerHTML = `
         <div class="location">${coords.name.split(',')[0]}</div>
         <div class="daylight-total">${minsToHours(todayTimes.daylight)} of daylight today</div>
+        <div class="next-milestone">${formatMilestone(nextMilestone)}</div>
         <div class="sun-times">
             <div class="sun-time-item">
                 <span class="sun-time-label">Sunrise</span>
@@ -331,6 +333,52 @@ function formatDelta(minutes) {
     if (rounded > 0) return `+${rounded} mins more`;
     if (rounded < 0) return `${Math.abs(rounded)} mins less`;
     return 'the same';
+}
+
+
+// --- getNextDaylightMilestone --------------------------------------
+// Finds the next June/December solstice and labels it as longest or
+// shortest day based on hemisphere.
+// --------------------------------------------------------------------
+function getNextDaylightMilestone(lat, date) {
+    const year = date.getFullYear();
+    const juneSolstice = new Date(year, 5, 21);
+    const decemberSolstice = new Date(year, 11, 21);
+
+    let nextSolstice;
+    if (date <= juneSolstice) {
+        nextSolstice = juneSolstice;
+    } else if (date <= decemberSolstice) {
+        nextSolstice = decemberSolstice;
+    } else {
+        nextSolstice = new Date(year + 1, 5, 21);
+    }
+
+    const isNorthernHemisphere = lat >= 0;
+    const isJuneSolstice = nextSolstice.getMonth() === 5;
+
+    const milestoneType = isJuneSolstice
+        ? (isNorthernHemisphere ? 'longest' : 'shortest')
+        : (isNorthernHemisphere ? 'shortest' : 'longest');
+
+    const todayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const nextSolsticeStart = new Date(nextSolstice.getFullYear(), nextSolstice.getMonth(), nextSolstice.getDate());
+    const millisecondsPerDay = 86400000;
+    const daysUntil = Math.round((nextSolsticeStart - todayStart) / millisecondsPerDay);
+
+    return { milestoneType, daysUntil };
+}
+
+
+// --- formatMilestone ------------------------------------------------
+// Formats the milestone message shown in the results section.
+// --------------------------------------------------------------------
+function formatMilestone(nextMilestone) {
+    if (nextMilestone.daysUntil === 0) {
+        return `Today is the ${nextMilestone.milestoneType} day`;
+    }
+
+    return `${nextMilestone.daysUntil} days until the ${nextMilestone.milestoneType} day`;
 }
 
 
