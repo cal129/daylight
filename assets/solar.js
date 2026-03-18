@@ -280,7 +280,11 @@ document.getElementById('searchbtn').addEventListener('click', async function() 
         resultDiv.innerHTML = `<div class="daylight-total">${error.message}</div>`;
     }
 });
-
+document.getElementById('input').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        document.getElementById('searchbtn').click();
+    }
+});
 
 // --- displayResults -------------------------------------------------
 // Builds the results HTML and drops it into the result div.
