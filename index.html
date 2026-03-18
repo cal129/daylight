@@ -4,26 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/styles.css">
     <title>Daylight Tracker</title>
 </head>
 
 <body>
-    <div class="container">
-        <h1>Daylight Tracker</h1>
-        <h2>HOW THE LIGHT IS SHIFTING — DAY BY DAY</h2>
-
-        <p>Enter a location to find out the daylight hours for that location.</p>
-    <div class="search-bar"></div>
+   <div class="container">
+    <h1>Daylight Tracker</h1>
+    <h2>HOW THE LIGHT IS SHIFTING — DAY BY DAY</h2>
+    <div class="search-bar">
         <input type="text" id="input" placeholder="Enter location">
-        <button id="locationbtn">Location</button>
+        <button id="locationbtn"><i class="fas fa-location-dot"></i></button>
         <button id="searchbtn">Search</button>
     </div>
-
-    <div id="result">
-
-    </div>
-    </div>
+    <div id="result"></div>
+</div>
 
     <script src="assets/solar.js"></script>
 </body>

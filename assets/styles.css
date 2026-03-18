@@ -1,12 +1,12 @@
 :root {
-    --bg-primary: #0d1117;
-    --bg-card: #161b22;
-    --border: #2d1f0e;
-    --text-primary: #f0e6d3;
-    --text-muted: #8b949e;
-    --accent-gold: #f59e0b;
-    --accent-gain: #f59e0b;
-    --accent-loss: #e05252;
+    --gradient: linear-gradient(to top, #f97316, #c2410c, #7c2d12, #1e1b4b);
+    --border-white: rgba(255, 255, 255, 0.6);
+    --text-primary: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.65);
+    --card-bg: rgba(255, 255, 255, 0.12);
+    --card-border: rgba(255, 255, 255, 0.25);
+    --accent-gain: #ffffff;
+    --accent-loss: rgba(255, 255, 255, 0.5);
     --font-body: system-ui, sans-serif;
     --font-serif: Georgia, serif;
 }
@@ -18,17 +18,23 @@
 }
 
 body {
-    background: var(--bg-primary);
+    background: var(--gradient);
     color: var(--text-primary);
     font-family: var(--font-body);
     min-height: 100vh;
+    display: flex;
+    justify-content: center;
 }
 
 .container {
-    max-width: 480px;
-    margin: 0 auto;
+    width: 100%;
+   
     padding: 40px 20px;
+    min-height: 100vh;
+   border: #ffffff 30px solid; 
 }
+  /* border: #ffffff 30px solid; */
+
 
 h1 {
     font-family: var(--font-serif);
@@ -47,43 +53,15 @@ h2 {
     margin-bottom: 32px;
 }
 
-.search-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 32px;
-}
 
-input {
-    flex: 1;
-    background: #161b22;
-    border: 0.5px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 16px;
-    color: var(--text-primary);
-    font-family: var(--font-body);
-    font-size: 0.9rem;
-    outline: none;
-}
 
 input:focus {
     border-color: var(--accent-gold);
 }
 
-button {
-    background: var(--accent-gold);
-    color: #0d1117;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 18px;
-    font-family: var(--font-body);
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-}
 
-button:hover {
-    background: #fbbf24;
-}
+
+
 
 .location {
     font-family: var(--font-serif);
@@ -98,6 +76,32 @@ button:hover {
     margin-bottom: 24px;
 }
 
+.sun-times {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.sun-time-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sun-time-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.sun-time-value {
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    font-weight: normal;
+    color: var(--text-primary);
+}
+
 .cards {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -106,10 +110,11 @@ button:hover {
 }
 
 .card {
-    background: var(--bg-card);
-    border: 0.5px solid var(--border);
+    background: var(--card-bg);
+    border: 0.5px solid var(--card-border);
     border-radius: 12px;
     padding: 20px 16px;
+    backdrop-filter: blur(8px);
 }
 
 .card-period {
@@ -139,4 +144,40 @@ button:hover {
     gap: 8px;
     margin-bottom: 32px;
     width: 100%;
+}
+
+input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.15);
+    border: 0.5px solid var(--card-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+input:focus {
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+button {
+    background: rgba(255, 255, 255, 0.9);
+    color: #7c2d12;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #ffffff;
 }

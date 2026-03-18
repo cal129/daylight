@@ -197,8 +197,12 @@ async function getCoordinates(city) {
     const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`;
     const response = await fetch(url);
     const data = await response.json();
-    const result = data[0];
 
+    if (!data.length) {
+        throw new Error(`Could not find "${city}"`);
+    }
+
+    const result = data[0];
     return {
         lat: parseFloat(result.lat),
         lon: parseFloat(result.lon),
@@ -207,16 +211,32 @@ async function getCoordinates(city) {
 }
 
 
-// --- Search button --------------------------------------------------
-// Kicks everything off when the user hits Search. Gets coordinates
-// for the city, calculates sun times for today, yesterday, and a
-// week ago, works out the deltas, then hands everything to
-// displayResults to put on the page.
+// --- getLocationNameFromCoords -------------------------------------
+// Reverse geocodes lat/lon into a human-readable place name so GPS
+// searches can use the same display card format as text searches.
 // --------------------------------------------------------------------
-document.getElementById('searchbtn').addEventListener('click', async function() {
-    const city = document.getElementById('input').value.trim();
-    const coords = await getCoordinates(city);
+async function getLocationNameFromCoords(lat, lon) {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+    const response = await fetch(url);
+    const data = await response.json();
 
+    const address = data.address;
+    const name = address.city 
+    || address.town 
+    || address.village 
+    || address.suburb
+    || address.county
+    || 'Current location';
+
+return name;    
+}
+
+
+// --- calculateAndDisplay --------------------------------------------
+// Runs the daylight calculation for today, yesterday, and last week,
+// then renders the result card.
+// --------------------------------------------------------------------
+function calculateAndDisplay(coords) {
     const today = new Date();
 
     const yesterday = new Date();
@@ -239,6 +259,26 @@ document.getElementById('searchbtn').addEventListener('click', async function() 
     const deltaWeek = todayTimes.daylight - lastWeekTimes.daylight;
 
     displayResults(coords, todayTimes, deltaDay, deltaWeek);
+}
+
+
+// --- Search button --------------------------------------------------
+// Kicks everything off when the user hits Search. Gets coordinates
+// for the city, calculates sun times for today, yesterday, and a
+// week ago, works out the deltas, then hands everything to
+// displayResults to put on the page.
+// --------------------------------------------------------------------
+document.getElementById('searchbtn').addEventListener('click', async function() {
+    const city = document.getElementById('input').value.trim();
+    if (!city) return;
+
+    try {
+        const coords = await getCoordinates(city);
+        calculateAndDisplay(coords);
+    } catch (error) {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `<div class="daylight-total">${error.message}</div>`;
+    }
 });
 
 
@@ -252,6 +292,16 @@ function displayResults(coords, todayTimes, deltaDay, deltaWeek) {
     resultDiv.innerHTML = `
         <div class="location">${coords.name.split(',')[0]}</div>
         <div class="daylight-total">${minsToHours(todayTimes.daylight)} of daylight today</div>
+        <div class="sun-times">
+            <div class="sun-time-item">
+                <span class="sun-time-label">Sunrise</span>
+                <span class="sun-time-value">${minsToTime(todayTimes.sunrise)}</span>
+            </div>
+            <div class="sun-time-item">
+                <span class="sun-time-label">Sunset</span>
+                <span class="sun-time-value">${minsToTime(todayTimes.sunset)}</span>
+            </div>
+        </div>
         <div class="cards">
             <div class="card">
                 <div class="card-period">vs yesterday</div>
@@ -280,6 +330,17 @@ function formatDelta(minutes) {
 }
 
 
+// --- minsToTime -------------------------------------------------
+// Converts minutes from midnight UTC into a readable HH:MM time string.
+// Used for displaying sunrise and sunset times.
+// --------------------------------------------------------------------
+function minsToTime(mins) {
+    const hours = Math.floor(mins / 60);
+    const minutes = Math.floor(mins % 60);
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
+
 // --- minsToHours ----------------------------------------------------
 // Converts a raw minute count into a readable hours and minutes
 // string. Used for displaying total daylight duration.
@@ -289,3 +350,32 @@ function minsToHours(mins) {
     const minutes = Math.floor(mins % 60);
     return `${hours}h ${minutes}m`;
 }
+
+// --- Location button ------------------------------------------------
+// Uses browser geolocation, reverse geocodes the coordinates to a
+// place name, then runs the same calculation path as text search.
+// --------------------------------------------------------------------
+document.getElementById('locationbtn').addEventListener('click', async function() {
+    const resultDiv = document.getElementById('result');
+
+    if (!navigator.geolocation) {
+        resultDiv.innerHTML = '<div class="daylight-total">Geolocation is not supported in this browser.</div>';
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        async function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const name = await getLocationNameFromCoords(lat, lon);
+
+            calculateAndDisplay({ lat, lon, name });
+        },
+        function() {
+            resultDiv.innerHTML = '<div class="daylight-total">Could not get your location. Please allow location access and try again.</div>';
+        }
+    );
+});
+
+// Auto-load Newquay on page start
+getCoordinates('Newquay').then(coords => calculateAndDisplay(coords));
